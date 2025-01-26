@@ -464,10 +464,27 @@ def mostrar_leitura_do_dia():
         st.subheader(f"Dia {dia_atual} - {leitura['mes']}")
         st.write(f" Leitura: {leitura['passagem']}")
         
-        # Checkbox para marcar como concluída
-        if st.checkbox("Marcar como concluída", value=esta_concluida(dia_atual)):
-            marcar_concluida(dia_atual)
-            st.success("Leitura marcada como concluída!")
+        # Verifica o estado atual
+        esta_marcada = esta_concluida(dia_atual)
+        
+        # Usa uma função para lidar com a mudança de estado
+        def on_change(dia):
+            # Obtém o estado atual do checkbox
+            novo_estado = st.session_state.get(f"check_dia_{dia}", False)
+            
+            # Atualiza o banco de dados
+            marcar_concluida(dia, novo_estado)
+            if novo_estado:
+                st.success("Leitura marcada como concluída!")
+        
+        # Checkbox com callback para mudança de estado
+        st.checkbox(
+            "Marcar como concluída", 
+            key=f"check_dia_{dia_atual}", 
+            value=esta_marcada,
+            on_change=on_change,
+            args=(dia_atual,)
+        )
     else:
         st.error("Não há leitura programada para hoje.")
 
